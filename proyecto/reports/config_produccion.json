@@ -1,0 +1,23 @@
+{
+  "timestamp": "1775321272.53613",
+  "models": [
+    "Logistic Regression",
+    "Neural Network",
+    "SVM",
+    "Random Forest"
+  ],
+  "optimal_thresholds": {
+    "Logistic Regression": 0.4545454545454546,
+    "Neural Network": 0.33333333333333337,
+    "SVM": 0.25252525252525254,
+    "Random Forest": 0.27272727272727276
+  },
+  "cv_results": {},
+  "dataset": {
+    "train_size": 1978,
+    "val_size": 500,
+    "test_size": 500,
+    "n_features": 17,
+    "smote_applied": true
+  }
+}
