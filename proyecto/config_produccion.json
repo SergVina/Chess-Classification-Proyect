@@ -1,19 +1,19 @@
 {
-  "fecha_generacion": "2026-05-03T17:16:43.891565",
-  "modelo_recomendado": "Ensemble",
+  "fecha_generacion": "2026-05-24T09:40:48.484602",
+  "modelo_recomendado": "Logistic Regression",
   "entrenamiento": {
     "smote_aplicado": true,
     "smote_info": {
-      "muestras_antes": 1500,
-      "muestras_después": 1978,
-      "aumento_pct": 31.866666666666667,
+      "muestras_antes": 600,
+      "muestras_después": 792,
+      "aumento_pct": 32.00000000000001,
       "distribucion_antes": {
-        "0": 989,
-        "1": 511
+        "0": 396,
+        "1": 204
       },
       "distribucion_después": {
-        "0": 989,
-        "1": 989
+        "0": 396,
+        "1": 396
       }
     }
   },
@@ -29,10 +29,10 @@
   ],
   "n_features": 17,
   "mejor_modelo": {
-    "nombre": "Ensemble",
-    "f1_score": 0.6510753632192913,
-    "accuracy": 0.69,
-    "roc_auc": 0.7263992869875223
+    "nombre": "Logistic Regression",
+    "f1_score": 0.6085492836451891,
+    "accuracy": 0.625,
+    "roc_auc": 0.6567513368983957
   },
   "instrucciones": [
     "Usar production_predictor.py para predicciones en producción",

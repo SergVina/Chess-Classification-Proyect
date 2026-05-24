@@ -54,8 +54,8 @@ La clasificación automática de habilidad en ajedrez presenta desafíos típico
 ```
 Datos originales: 2,500
 ├─ Train: 1,500 (60%)
-├─ Validation: 250 (10%)
-└─ Test: 750 (30%)
+├─ Validation: 500 (20%)
+└─ Test: 500 (20%)
 ```
 
 ### 2.2 Features
@@ -105,8 +105,8 @@ Datos originales: 2,500
 **Resultado post-preprocesamiento:**
 - Features: 17 (normalizados, rango ≈ [-2, 2])
 - Train: 1,978 muestras (después SMOTE)
-- Validation: 250 muestras
-- Test: 750 muestras
+- Validation: 500 muestras
+- Test: 500 muestras
 
 ---
 

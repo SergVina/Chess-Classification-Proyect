@@ -1,15 +1,3 @@
-"""
-PUNTO DE ENTRADA PRINCIPAL - Pipeline de clasificación de nivel de habilidad en ajedrez
-
-Ejecutar con: python main.py [opciones]
-
-Opciones:
-  --skip-eda           : Omitir generación de gráficos EDA
-  --model {all|lr|nn|svm|rf}  : Qué modelo entrenar (default: all)
-  --n-samples N        : Número de partidas a muestrear (default: 2500)
-  --help               : Mostrar esta ayuda
-"""
-
 import os
 import sys
 import argparse
@@ -19,7 +7,6 @@ import json
 import numpy as np
 from datetime import datetime
 
-# Imports del proyecto
 from preprocessing.preprocess import preprocess_pipeline
 from preprocessing.smote import aplicar_smote
 from models.logistic_regression import LogisticRegressionOvA
@@ -29,7 +16,7 @@ from models.random_forest_model import train_random_forest
 from evaluation.metrics import (
     evaluate_model, plot_confusion_matrix, plot_learning_curves,
     plot_nn_training_history, stratified_cv_evaluation, manual_cv_evaluation,
-    create_comparison_table, EnsembleVoting, evaluate_ensemble,
+        create_comparison_table, EnsembleVoting, evaluate_ensemble,
     plot_validation_curve, plot_lr_coefficients,
     find_optimal_threshold_for_recall, evaluate_with_threshold
 )
@@ -56,7 +43,6 @@ def train_logistic_regression(data_split, X_train, y_train, X_val, y_val):
     print("ENTRENANDO: REGRESIÓN LOGÍSTICA (OvA con numpy)")
     print("="*60)
     
-    # Búsqueda manual de hiperparámetros
     best_lr_config = None
     best_lr_score = -np.inf
     best_lr_model = None
@@ -90,7 +76,6 @@ def train_neural_network(data_split, X_train, y_train, X_val, y_val):
     print("ENTRENANDO: RED NEURONAL FEEDFORWARD (numpy puro)")
     print("="*60)
     
-    # Búsqueda de hiperparámetros
     hidden_layers_list = [[32], [64, 32], [128, 64, 32]]
     learning_rates = [0.001, 0.01, 0.1]
     lambdas = [0.0, 0.001, 0.01]
@@ -162,8 +147,7 @@ def train_rf_model(data_split, X_train, y_train, X_val, y_val):
 
 def main():
     """Pipeline principal"""
-    
-    # Parser de argumentos
+
     parser = argparse.ArgumentParser(
         description='Pipeline de clasificación de habilidad en ajedrez',
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -185,7 +169,6 @@ Ejemplos:
     
     args = parser.parse_args()
     
-    # Iniciar
     start_time = time.time()
     print("\n" + "="*80)
     print("  PIPELINE DE CLASIFICACIÓN - NIVEL DE HABILIDAD EN AJEDREZ")
@@ -196,7 +179,6 @@ Ejemplos:
     print(f"EDA: {'Omitido' if args.skip_eda else 'Incluido'}")
     print("="*80 + "\n")
     
-    # PASO 1: Verificar datos y preprocesar
     print("[1/5] VERIFICANDO Y PREPROCESANDO DATOS...")
     step_time = time.time()
     
@@ -221,7 +203,6 @@ Ejemplos:
     y_val = data_split['y_val']
     y_test = data_split['y_test']
 
-    # Construir lista ordenada de nombres de features (misma concatenación que create_feature_matrix)
     feature_names = (
         ['turns', 'opening_ply']
         + features_data['victory_status_cols']
@@ -233,7 +214,6 @@ Ejemplos:
     elapsed = time.time() - step_time
     print(f"✓ Preprocesamiento completado en {elapsed:.2f}s\n")
     
-    # PASO 1B: Aplicar SMOTE para balancear clases
     print("[1B/5] BALANCEANDO CLASES CON SMOTE...")
     step_time = time.time()
     
@@ -251,7 +231,6 @@ Ejemplos:
         print(f"⚠️ Error en SMOTE (continuando sin él): {e}\n")
         smote_info = None
     
-    # PASO 2: Entrenar modelos
     print("[2/5] ENTRENANDO MODELOS...")
     step_time = time.time()
     
@@ -284,7 +263,6 @@ Ejemplos:
     elapsed = time.time() - step_time
     print(f"✓ Entrenamiento completado en {elapsed:.2f}s\n")
     
-    # GUARDANDO MODELOS PARA PRODUCCIÓN
     print("[2B/5] GUARDANDO MODELOS ENTRENADOS...")
     step_time = time.time()
     
@@ -311,15 +289,12 @@ Ejemplos:
     elapsed = time.time() - step_time
     print(f"✓ Modelos guardados en {elapsed:.2f}s\n")
     
-    # PASO 3: Generar visualizaciones
     print("[3/5] GENERANDO VISUALIZACIONES...")
     step_time = time.time()
 
-    # Datos combinados train+val reutilizados en visualizaciones y CV
     X_trainval = np.vstack([X_train, X_val])
     y_trainval = np.hstack([y_train, y_val])
 
-    # Kwargs de modelos custom (para curvas de validación y CV en paso 5)
     _lr_cfg = configs.get('Logistic Regression', {})
     lr_cv_kwargs = {
         'learning_rate': _lr_cfg.get('learning_rate', 0.01),
@@ -340,18 +315,14 @@ Ejemplos:
         nn = models['Neural Network']
         plot_nn_training_history(nn.history, nn.best_epoch, plots_dir='plots')
 
-    # Curvas de aprendizaje para modelos sklearn (train score vs CV score en función del tamaño)
-    # LR y NN son modelos custom (sin __sklearn_tags__), no son compatibles con learning_curve de sklearn
     learning_curve_models = ['SVM (RBF)', 'Random Forest']
     for model_name in learning_curve_models:
         if model_name in models:
             plot_learning_curves(models[model_name], X_train, y_train, model_name, plots_dir='plots')
 
-    # Coeficientes de Regresión Logística como importancia de features
     if 'Logistic Regression' in models:
         plot_lr_coefficients(models['Logistic Regression'], feature_names, plots_dir='plots')
 
-    # Curvas de validación de hiperparámetros para LR y NN
     if 'Logistic Regression' in models:
         print("\n  Generando curva de validación LR (lambda_reg)...")
         plot_validation_curve(
@@ -377,13 +348,12 @@ Ejemplos:
 
     if rf_feature_importance is not None:
         from evaluation.metrics import plot_feature_importance
-        plot_feature_importance(rf_feature_importance, n_features_to_show=15, plots_dir='plots',
+        plot_feature_importance(rf_feature_importance, feature_names=feature_names, n_features_to_show=15, plots_dir='plots',
                                model_name='Random Forest')
     
     elapsed = time.time() - step_time
     print(f"✓ Visualizaciones completadas en {elapsed:.2f}s\n")
     
-    # PASO 4: Evaluar modelos
     print("[4/5] EVALUANDO MODELOS EN TEST...")
     step_time = time.time()
     
@@ -393,10 +363,8 @@ Ejemplos:
         metrics = evaluate_model(model, X_test, y_test, model_name=model_name)
         results[model_name] = metrics
         
-        # Plotear matriz de confusión
         plot_confusion_matrix(metrics['conf_matrix'], model_name, plots_dir='plots')
         
-        # Plotear curva ROC (si está disponible)
         if metrics.get('y_proba') is not None:
             from evaluation.metrics import plot_roc_curve
             plot_roc_curve(y_test, metrics['y_proba'], model_name, plots_dir='plots')
@@ -404,11 +372,9 @@ Ejemplos:
     elapsed = time.time() - step_time
     print(f"✓ Evaluación completada en {elapsed:.2f}s\n")
     
-    # PASO 5: Validación cruzada y tabla comparativa
     print("[5/5] GENERANDO TABLA COMPARATIVA...")
     step_time = time.time()
 
-    # Ensemble soft voting ponderado por ROC-AUC de cada modelo
     print("\nEntrenando Ensemble (Soft Voting ponderado por ROC-AUC)...")
     ensemble_weights = {
         name: results[name]['roc_auc'] if results[name].get('roc_auc') else 1.0
@@ -418,8 +384,6 @@ Ejemplos:
     ensemble_metrics = evaluate_ensemble(ensemble, X_test, y_test, plots_dir='plots')
     results['Ensemble'] = ensemble_metrics
 
-    # Validación cruzada 5-fold estratificada sobre train+val combinado
-    # X_trainval, y_trainval, lr_cv_kwargs y nn_cv_kwargs ya definidos en paso 3
     print("\nValidación cruzada estratificada (5-fold) sobre train+val:")
 
     for model_name, model in models.items():
@@ -440,17 +404,13 @@ Ejemplos:
         else:
             print(f"  {model_name}: (CV no disponible)")
     
-    # Tabla comparativa provisional (se sobreescribe al final con versiones threshold)
     create_comparison_table(results, output_file='model_comparison.txt')
 
-    # GUARDANDO CONFIGURACIÓN DE PRODUCCIÓN
     print("\nGardando configuración para producción...")
     
-    # Convertir numpy types a Python types para JSON (incluyendo keys y values)
     def convertir_numpy_types(obj):
         """Convierte numpy types a tipos Python nativos"""
         if isinstance(obj, dict):
-            # Convertir KEYS y VALUES
             return {str(k) if isinstance(k, (np.integer, np.floating)) else k: 
                    convertir_numpy_types(v) for k, v in obj.items()}
         elif isinstance(obj, (list, tuple)):
@@ -498,7 +458,6 @@ Ejemplos:
         json.dump(config_produccion, f, indent=2, ensure_ascii=False)
     print("  ✓ config_produccion.json")
     
-    # Análisis de threshold óptimo para modelos con probabilidades
     print("\nAnálisis de Threshold Óptimo para F1-Score Máximo:")
     from evaluation.metrics import find_optimal_threshold
     for model_name, metrics in results.items():
@@ -510,7 +469,6 @@ Ejemplos:
                 print(f"    F1-Score óptimo: {optimal['f1']:.4f}")
                 print(f"    Precision: {optimal['precision']:.4f}, Recall: {optimal['recall']:.4f}")
 
-    # EVALUACIÓN CON THRESHOLD AJUSTADO PARA MEJORAR RECALL DE INTERMEDIOS
     print("\n" + "="*60)
     print("EVALUACIÓN CON THRESHOLD AJUSTADO (mejora Recall Intermedio)")
     print("="*60)
@@ -528,9 +486,14 @@ Ejemplos:
         )
         threshold_results[f"{model_name} (thr={thr:.3f})"] = thr_metrics
 
-    # Tabla comparativa extendida con versiones threshold
     all_results_with_thr = {**results, **threshold_results}
     create_comparison_table(all_results_with_thr, output_file='model_comparison.txt')
+    # Generar única imagen comparativa para la memoria
+    try:
+        from evaluation.metrics import plot_models_comparison
+        plot_models_comparison(all_results_with_thr, plots_dir='plots')
+    except Exception as e:
+        print(f"⚠️ Error al generar imagen comparativa: {e}")
     from evaluation.metrics import generate_detailed_report
     generate_detailed_report(all_results_with_thr, output_file='detailed_report.txt')
 
@@ -542,7 +505,6 @@ Ejemplos:
     elapsed = time.time() - step_time
     print(f"✓ Tabla comparativa completada en {elapsed:.2f}s\n")
     
-    # INFORMACIÓN DE SMOTE
     if smote_info and 'error' not in smote_info:
         print("📊 IMPACTO DE SMOTE:")
         print(f"  Muestras originales: {smote_info['muestras_antes']}")
@@ -550,7 +512,6 @@ Ejemplos:
         print(f"  Aumento: +{smote_info['aumento_pct']:.1f}%")
         print()
     
-    # RESUMEN FINAL
     total_time = time.time() - start_time
     print("="*80)
     print("PIPELINE COMPLETADO EXITOSAMENTE")

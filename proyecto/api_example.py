@@ -1,10 +1,3 @@
-"""
-API SIMPLE: Servicio de Predicción
-Demuestra cómo usar el predictor como un servicio
-
-Ejecutar con: python api_example.py
-"""
-
 from production_predictor import PredictorProducción
 import json
 from datetime import datetime
@@ -46,10 +39,8 @@ class ServicioPredicion:
             }
         """
         try:
-            # Validar entrada
             features_esperadas = 17
             
-            # Construir vector de features
             features = [
                 features_dict.get('turns', 0),
                 features_dict.get('opening_ply', 0),
@@ -62,7 +53,6 @@ class ServicioPredicion:
                 features_dict.get('black_rating', 0),
             ]
             
-            # Agregar ECO families
             eco_families = features_dict.get('eco_families', [0]*8)
             if len(eco_families) != 8:
                 return {
@@ -78,7 +68,6 @@ class ServicioPredicion:
                     'mensaje': f'Se esperan {features_esperadas} features, recibidas {len(features)}'
                 }
             
-            # Hacer predicción
             resultado = self.predictor.predecir_una(features)
             
             respuesta = {
@@ -94,7 +83,6 @@ class ServicioPredicion:
                 'mensaje': 'Predicción realizada exitosamente'
             }
             
-            # Guardar en cache
             self.predicciones_cache.append(respuesta)
             
             return respuesta
@@ -130,11 +118,9 @@ def demostrar_api():
     print("API DE PREDICCIÓN - Demostración")
     print("="*100)
     
-    # Inicializar servicio
     print("\n[1/3] Inicializando servicio...")
     servicio = ServicioPredicion('random_forest')
     
-    # Casos de prueba
     casos_prueba = [
         {
             'nombre': 'PartidaCorta_Rápida',
@@ -183,7 +169,6 @@ def demostrar_api():
         }
     ]
     
-    # Predecir para cada caso
     print("\n[2/3] Realizando predicciones...")
     print("-" * 100)
     
@@ -201,7 +186,6 @@ def demostrar_api():
         else:
             print(f"   ❌ Error: {resultado['mensaje']}")
     
-    # Estadísticas
     print("\n[3/3] Estadísticas del Servicio")
     print("-" * 100)
     
@@ -215,14 +199,12 @@ def demostrar_api():
     print(f"  Confianza promedio: {stats['confianza_promedio']:.3f}")
     print(f"  Última predicción: {stats['ultima_prediccion']}")
     
-    # Ejemplo de respuesta JSON
     print("\n📋 EJEMPLO DE RESPUESTA JSON (para API REST):")
     print("-" * 100)
     
     respuesta_json = servicio.predecir_partida(casos_prueba[0]['features'])
     print(json.dumps(respuesta_json, indent=2, ensure_ascii=False))
     
-    # Tutorial de uso
     print("\n" + "="*100)
     print("CÓMO USAR EN TU APLICACIÓN")
     print("="*100)

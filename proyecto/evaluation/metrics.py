@@ -678,7 +678,7 @@ def plot_lr_coefficients(lr_model, feature_names, plots_dir='plots'):
     print("  ✓ Coeficientes LR guardados: lr_feature_coefficients.png")
 
 
-def plot_feature_importance(feature_importance, n_features_to_show=15, plots_dir='plots', model_name='Random Forest'):
+def plot_feature_importance(feature_importance, feature_names=None, n_features_to_show=15, plots_dir='plots', model_name='Random Forest'):
     """
     Visualiza la importancia de features para Random Forest.
     
@@ -686,6 +686,8 @@ def plot_feature_importance(feature_importance, n_features_to_show=15, plots_dir
     -----------
     feature_importance : np.ndarray
         Array de importancia de features
+    feature_names : list[str] | None
+        Nombres reales de las features en el mismo orden que `feature_importance`
     n_features_to_show : int
         Número de top features a mostrar
     plots_dir : str
@@ -698,12 +700,16 @@ def plot_feature_importance(feature_importance, n_features_to_show=15, plots_dir
     # Obtener top N features
     sorted_idx = np.argsort(feature_importance)[::-1][:n_features_to_show]
     top_importance = feature_importance[sorted_idx]
+    if feature_names is not None and len(feature_names) == len(feature_importance):
+        top_labels = [feature_names[i] for i in sorted_idx]
+    else:
+        top_labels = [f'Feature {i}' for i in sorted_idx]
     
     fig, ax = plt.subplots(figsize=(10, 6))
     
     ax.barh(range(len(top_importance)), top_importance, color='#2E86AB', edgecolor='black', linewidth=1)
     ax.set_yticks(range(len(top_importance)))
-    ax.set_yticklabels([f'Feature {i}' for i in sorted_idx])
+    ax.set_yticklabels(top_labels)
     ax.set_xlabel('Importancia Relativa', fontsize=12, fontweight='bold')
     ax.set_title(f'Top {n_features_to_show} Features - {model_name}', fontsize=14, fontweight='bold')
     ax.grid(True, alpha=0.3, axis='x')
@@ -922,3 +928,90 @@ def create_comparison_table(results_dict, output_file='model_comparison.txt'):
         f.write("="*120 + "\n")
     
     print(f"Tabla comparativa guardada en {output_file}")
+
+
+def plot_models_comparison(results_dict, plots_dir='plots', metrics_to_show=None):
+    """
+    Crea una imagen única que compara varios modelos en métricas seleccionadas.
+
+    Parámetros:
+    -----------
+    results_dict : dict
+        Diccionario {model_name: metrics_dict}
+    plots_dir : str
+        Directorio donde guardar la imagen
+    metrics_to_show : list[str] | None
+        Lista de métricas a mostrar (por defecto: ['accuracy','f1_macro','roc_auc'])
+    """
+    if metrics_to_show is None:
+        metrics_to_show = ['accuracy', 'f1_macro', 'roc_auc']
+
+    os.makedirs(plots_dir, exist_ok=True)
+
+    # Excluir comparaciones con threshold ajustado que se generan después
+    def _is_threshold_variant(name):
+        return '(thr=' in name or 'threshold' in name or 'thr=' in name
+
+    filtered = {k: v for k, v in results_dict.items() if not _is_threshold_variant(k)}
+    if len(filtered) == 0:
+        filtered = results_dict
+
+    model_names = list(filtered.keys())
+    n_models = len(model_names)
+
+    # Recolectar valores (NaN cuando falte una métrica)
+    data = {}
+    for metric in metrics_to_show:
+        vals = []
+        for m in model_names:
+            v = filtered[m].get(metric)
+            try:
+                vals.append(float(v) if v is not None else np.nan)
+            except Exception:
+                vals.append(np.nan)
+        data[metric] = np.array(vals, dtype=float)
+
+    # Ordenar modelos por métrica principal (f1_macro) descendente para mejor legibilidad
+    primary = 'f1_macro' if 'f1_macro' in metrics_to_show else metrics_to_show[0]
+    order = np.argsort(-np.nan_to_num(data.get(primary, np.zeros(n_models)), nan=-1.0))
+    model_names = [model_names[i] for i in order]
+    for metric in metrics_to_show:
+        data[metric] = data[metric][order]
+
+    # Estética y paleta
+    plt.style.use('ggplot')
+    cmap = plt.get_cmap('tab10')
+    colors = [cmap(i) for i in range(len(metrics_to_show))]
+
+    # Gráfico de barras horizontales agrupadas
+    fig, ax = plt.subplots(figsize=(max(10, n_models * 0.9), 6))
+    y = np.arange(n_models)
+    height = 0.18
+
+    for i, metric in enumerate(metrics_to_show):
+        offsets = y + (i - (len(metrics_to_show)-1)/2) * height
+        vals = data[metric]
+        bars = ax.barh(offsets, vals, height, label=metric.replace('_', ' ').title(), color=colors[i])
+
+        # Anotar dentro/fuera barra
+        for bar, val in zip(bars, vals):
+            if np.isnan(val):
+                # marcar como ausente
+                bx = bar.get_width()
+                ax.text(bx + 0.02, bar.get_y() + bar.get_height()/2, 'N/A', va='center', fontsize=9, color='gray')
+            else:
+                ax.text(bar.get_width() + 0.01, bar.get_y() + bar.get_height()/2, f"{val:.3f}", va='center', fontsize=9)
+
+    ax.set_yticks(y)
+    ax.set_yticklabels(model_names)
+    ax.set_xlim(0, 1.05)
+    ax.set_xlabel('Valor', fontsize=12, fontweight='bold')
+    ax.set_title('Comparativa de Modelos — Accuracy / F1 / ROC-AUC', fontsize=14, fontweight='bold')
+    ax.legend(loc='upper right')
+    plt.tight_layout()
+
+    out_path = os.path.join(plots_dir, 'models_comparison_improved.png')
+    plt.savefig(out_path, dpi=200)
+    plt.close()
+
+    print(f"  ✓ Imagen comparativa guardada: {out_path}")

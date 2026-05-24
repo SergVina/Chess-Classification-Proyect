@@ -235,10 +235,12 @@ def preprocess_data(df, target, features_data, fit_scalers=True):
     numeric_features = ['turns', 'opening_ply', 'base_time', 'increment', 'rated']
     numeric_indices = [0, 1, 5, 6, 4]  # Posiciones en X después del hstack
     
+    # NOTE: This legacy function is kept for compatibility but the preferred
+    # workflow is to call `fit_and_apply_scalers` after splitting so scalers
+    # are fit only on the training set (avoid data leakage).
     X = create_feature_matrix(features_data)
     
     # Para normalización, necesitamos procesar los features numéricos
-    # Creamos una copia de X
     X_processed = X.copy()
     
     # Normalizar turns
@@ -293,6 +295,58 @@ def preprocess_data(df, target, features_data, fit_scalers=True):
     return X_processed, scalers
 
 
+def fit_and_apply_scalers(X_full, X_train_idx, features_data):
+    """
+    Ajusta los StandardScalers usando únicamente `X_full[X_train_idx]` y
+    transforma `X_full` entero. Retorna (X_processed_full, scalers_dict).
+
+    Parámetros:
+    - X_full: ndarray (n_samples, n_features) sin normalizar
+    - X_train_idx: array-like índices de las muestras de entrenamiento
+    - features_data: dict devuelto por feature_engineering (necesario para
+      calcular posiciones de columnas)
+    """
+    scalers = {}
+    X_processed = X_full.copy()
+
+    n_victory = len(features_data['victory_status_cols'])
+    n_winner = len(features_data['winner_cols'])
+
+    idx_rated = 2 + n_victory + n_winner
+    idx_base_time = idx_rated + 1
+    idx_increment = idx_base_time + 1
+
+    # Columns numéricas a normalizar: turns (0), opening_ply (1), rated,
+    # base_time, increment
+    # Fit scalers on TRAIN only
+    scaler_turns = StandardScaler()
+    scaler_turns.fit(X_full[X_train_idx, 0:1])
+    X_processed[:, 0:1] = scaler_turns.transform(X_full[:, 0:1])
+    scalers['turns'] = scaler_turns
+
+    scaler_opening_ply = StandardScaler()
+    scaler_opening_ply.fit(X_full[X_train_idx, 1:2])
+    X_processed[:, 1:2] = scaler_opening_ply.transform(X_full[:, 1:2])
+    scalers['opening_ply'] = scaler_opening_ply
+
+    scaler_rated = StandardScaler()
+    scaler_rated.fit(X_full[X_train_idx, idx_rated:idx_rated+1])
+    X_processed[:, idx_rated:idx_rated+1] = scaler_rated.transform(X_full[:, idx_rated:idx_rated+1])
+    scalers['rated'] = scaler_rated
+
+    scaler_base_time = StandardScaler()
+    scaler_base_time.fit(X_full[X_train_idx, idx_base_time:idx_base_time+1])
+    X_processed[:, idx_base_time:idx_base_time+1] = scaler_base_time.transform(X_full[:, idx_base_time:idx_base_time+1])
+    scalers['base_time'] = scaler_base_time
+
+    scaler_increment = StandardScaler()
+    scaler_increment.fit(X_full[X_train_idx, idx_increment:idx_increment+1])
+    X_processed[:, idx_increment:idx_increment+1] = scaler_increment.transform(X_full[:, idx_increment:idx_increment+1])
+    scalers['increment'] = scaler_increment
+
+    return X_processed, scalers
+
+
 def split_data(X, y, test_size=0.2, val_size=0.2):
     """
     Divide los datos en train (60%), validación (20%) y test (20%).
@@ -313,16 +367,27 @@ def split_data(X, y, test_size=0.2, val_size=0.2):
     --------
     dict : Diccionario con X_train, X_val, X_test, y_train, y_val, y_test
     """
-    # Primera división: train+val vs test (80% vs 20%)
-    X_temp, X_test, y_temp, y_test = train_test_split(
-        X, y, test_size=test_size, stratify=y, random_state=42
+    # Hacemos split sobre índices para poder devolver también los índices
+    indices = np.arange(len(X))
+
+    # Primera división: temp vs test (80% vs 20%)
+    idx_temp, idx_test = train_test_split(
+        indices, test_size=test_size, stratify=y, random_state=42
     )
-    
-    # Segunda división: train vs val (60% vs 20% del total, que es 75% vs 25% de temp)
+
+    # Segunda división: train vs val (sobre temp)
     val_proportion = val_size / (1 - test_size)
-    X_train, X_val, y_train, y_val = train_test_split(
-        X_temp, y_temp, test_size=val_proportion, stratify=y_temp, random_state=42
+    idx_train, idx_val = train_test_split(
+        idx_temp, test_size=val_proportion, stratify=y[idx_temp], random_state=42
     )
+
+    X_train = X[idx_train]
+    X_val = X[idx_val]
+    X_test = X[idx_test]
+
+    y_train = y[idx_train]
+    y_val = y[idx_val]
+    y_test = y[idx_test]
     
     print(f"\nDivisión de datos:")
     print(f"  Train: {X_train.shape[0]} muestras ({100*X_train.shape[0]/len(X):.1f}%)")
@@ -335,7 +400,10 @@ def split_data(X, y, test_size=0.2, val_size=0.2):
         'X_test': X_test,
         'y_train': y_train,
         'y_val': y_val,
-        'y_test': y_test
+        'y_test': y_test,
+        'idx_train': idx_train,
+        'idx_val': idx_val,
+        'idx_test': idx_test
     }
 
 
@@ -574,11 +642,20 @@ def preprocess_pipeline(csv_path, n_samples=2500, plots_dir='plots', skip_eda=Fa
     # 4. Feature engineering
     features_data = feature_engineering(df_sampled)
     
-    # 5. Preprocesar (scalers y encoders)
-    X_processed, scalers = preprocess_data(df_sampled, target_sampled, features_data, fit_scalers=True)
-    
-    # 6. Split train/val/test
-    data_split = split_data(X_processed, target_sampled, test_size=0.2, val_size=0.2)
+    # 5. Crear matriz de features (sin normalizar) y hacer SPLIT primero
+    X_raw = create_feature_matrix(features_data)
+
+    # 6. Split train/val/test (antes de ajustar scalers para evitar data leakage)
+    data_split = split_data(X_raw, target_sampled, test_size=0.2, val_size=0.2)
+
+    # 7. Ajustar scalers usando SOLO el TRAIN y transformar todo el conjunto
+    idx_train = data_split['idx_train']
+    X_processed, scalers = fit_and_apply_scalers(X_raw, idx_train, features_data)
+
+    # Reemplazar X_train/X_val/X_test en data_split con sus versiones normalizadas
+    data_split['X_train'] = X_processed[data_split['idx_train']]
+    data_split['X_val'] = X_processed[data_split['idx_val']]
+    data_split['X_test'] = X_processed[data_split['idx_test']]
     
     # 7. EDA (si no está skipped)
     if not skip_eda:

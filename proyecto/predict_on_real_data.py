@@ -1,10 +1,3 @@
-"""
-SCRIPT AVANZADO: Predicciones en Producción con Datos Reales
-Carga datos del dataset de prueba y hace predicciones
-
-Ejecutar con: python predict_on_real_data.py
-"""
-
 import numpy as np
 import pandas as pd
 import pickle
@@ -16,7 +9,6 @@ from datetime import datetime
 def load_test_data():
     """Carga datos de prueba del dataset preprocesado"""
     try:
-        # Intentar cargar datos procesados
         with open('data/test_data.pkl', 'rb') as f:
             data = pickle.load(f)
         return data
@@ -28,17 +20,15 @@ def generate_sample_data(n_samples=50):
     """Genera datos de ejemplo realistas"""
     print(f"\n📊 Generando {n_samples} partidas de ejemplo...")
     
-    # Simulación realista de features
     np.random.seed(42)
     X = np.random.randn(n_samples, 17)
     
-    # Normalizar a rangos realistas
-    X[:, 0] = np.abs(X[:, 0] * 20 + 40).astype(int)  # turns: 20-60
-    X[:, 1] = np.abs(X[:, 1] * 15 + 20).astype(int)  # opening_ply: 5-35
-    X[:, 2:6] = np.random.randint(0, 2, (n_samples, 4))  # variables binarias
-    X[:, 6] = np.abs(X[:, 6] * 500 + 480).astype(int)  # base_time
-    X[:, 7] = np.abs(X[:, 7] * 100).astype(int)  # increment
-    X[:, 8:] = np.random.randn(n_samples, 9)  # ratings y categorías
+    X[:, 0] = np.abs(X[:, 0] * 20 + 40).astype(int)
+    X[:, 1] = np.abs(X[:, 1] * 15 + 20).astype(int)
+    X[:, 2:6] = np.random.randint(0, 2, (n_samples, 4))
+    X[:, 6] = np.abs(X[:, 6] * 500 + 480).astype(int)
+    X[:, 7] = np.abs(X[:, 7] * 100).astype(int)
+    X[:, 8:] = np.random.randn(n_samples, 9)
     
     return X
 
@@ -47,7 +37,6 @@ def main():
     print("PREDICCIONES EN PRODUCCIÓN - Datos Reales")
     print("="*100)
     
-    # 1. Cargar predictor
     print("\n[1/4] Inicializando predictor...")
     try:
         predictor = PredictorProducción('random_forest')
@@ -57,7 +46,6 @@ def main():
         print("   Ejecuta primero: python main.py")
         return
     
-    # 2. Cargar o generar datos
     print("\n[2/4] Cargando datos...")
     test_data = load_test_data()
     
@@ -70,7 +58,6 @@ def main():
         y_test = None
         print(f"✓ Datos de ejemplo generados: {X_test.shape[0]} muestras")
     
-    # 3. Hacer predicciones
     print("\n[3/4] Realizando predicciones...")
     
     resultados = predictor.predecir(
@@ -86,11 +73,9 @@ def main():
     
     print(f"✓ {len(y_pred)} predicciones realizadas")
     
-    # 4. Análisis de resultados
     print("\n[4/4] Análisis de Resultados")
     print("-" * 100)
     
-    # Estadísticas generales
     n_principiante = sum(y_pred == 0)
     n_intermedio = sum(y_pred == 1)
     
@@ -110,7 +95,6 @@ def main():
     print(f"  Mínimo:   {y_proba[:, 1].min():.3f}")
     print(f"  Máximo:   {y_proba[:, 1].max():.3f}")
     
-    # Tabla de ejemplos
     print(f"\n📋 PRIMEROS 10 RESULTADOS:")
     print(f"{'#':<3} | {'Clase':<12} | {'P(Intermedio)':<15} | {'Confianza':<12} | {'Clasificación':<15}")
     print("-" * 70)
@@ -120,23 +104,19 @@ def main():
         marca = "✓" if confianza[i] > 0.3 else "!"
         print(f"{i+1:<3} | {clase_nombre:<12} | {y_proba[i, 1]:<15.1%} | {confianza[i]:<12.3f} | {marca:<15}")
     
-    # Si tenemos datos reales con etiquetas
     if y_test is not None:
         print(f"\n" + "="*100)
         print("COMPARACIÓN CON DATOS REALES")
         print("="*100)
         
-        # Convertir a binario si es multi-clase
         if len(np.unique(y_test)) <= 2:
             y_test_binary = y_test
         else:
-            # Si hay 3 clases, usar solo Principiante vs Intermedio
             mask = y_test < 2
             y_test_binary = y_test[mask]
             y_pred = y_pred[mask]
             X_test = X_test[mask]
         
-        # Matriz de confusión
         cm = confusion_matrix(y_test_binary, y_pred)
         
         print(f"\n📊 MATRIZ DE CONFUSIÓN:")
@@ -145,7 +125,6 @@ def main():
         print(f"Real: P    | {cm[0,0]:<12} | {cm[0,1]:<12}")
         print(f"Real: I    | {cm[1,0]:<12} | {cm[1,1]:<12}")
         
-        # Métricas
         accuracy = (cm[0,0] + cm[1,1]) / cm.sum()
         print(f"\n📈 MÉTRICAS:")
         print(f"  Accuracy: {accuracy:.1%}")
@@ -155,12 +134,10 @@ def main():
             print(f"  Recall Intermedio:   {cm[1,1]/(cm[1,0]+cm[1,1]):.1%}")
             print(f"  Precision Intermedio: {cm[1,1]/(cm[0,1]+cm[1,1]):.1%}")
         
-        # Classification report
         print(f"\n📋 CLASSIFICATION REPORT:")
         print(classification_report(y_test_binary, y_pred, 
                                    target_names=['Principiante', 'Intermedio']))
     
-    # RESUMEN FINAL
     print("\n" + "="*100)
     print("RESUMEN DE PREDICCIÓN EN PRODUCCIÓN")
     print("="*100)

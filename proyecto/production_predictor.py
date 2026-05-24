@@ -1,14 +1,3 @@
-"""
-MÓDULO DE PREDICCIÓN EN PRODUCCIÓN
-Implementa el threshold óptimo determinado por el análisis ROC-AUC
-
-Uso:
-    from production_predictor import PredictorProducción
-    
-    predictor = PredictorProducción('random_forest')
-    predicciones = predictor.predecir(X_nuevas)
-"""
-
 import os
 import json
 import pickle
@@ -17,15 +6,13 @@ from datetime import datetime
 from preprocessing.preprocess import preprocess_pipeline
 
 
-# Thresholds óptimos encontrados en análisis ROC-AUC
 OPTIMAL_THRESHOLDS = {
     'Logistic Regression': 0.394,
     'Neural Network': 0.354,
     'SVM (RBF)': 0.303,
-    'Random Forest': 0.343  # ⭐ MEJOR MODELO
+    'Random Forest': 0.343
 }
 
-# Nombres de clases
 CLASS_NAMES = ['Principiante', 'Intermedio']
 
 
@@ -56,7 +43,6 @@ class PredictorProducción:
         self.X_train = None
         self.y_train = None
         
-        # Mapeo de nombre a archivo y clase
         self.mapeo_modelos = {
             'random_forest': ('random_forest_model.pkl', 'Random Forest'),
             'svm': ('svm_model.pkl', 'SVM (RBF)'),
@@ -74,7 +60,6 @@ class PredictorProducción:
         archivo_modelo, nombre_clase = self.mapeo_modelos[self.modelo_nombre]
         ruta_modelo = os.path.join('models', archivo_modelo)
         
-        # Verificar si el modelo existe
         if not os.path.exists(ruta_modelo):
             raise FileNotFoundError(
                 f"❌ No se encontró el modelo: {ruta_modelo}\n"
@@ -82,7 +67,6 @@ class PredictorProducción:
                 f"   para entrenar y guardar los modelos primero."
             )
         
-        # Cargar modelo
         try:
             with open(ruta_modelo, 'rb') as f:
                 self.modelo = pickle.load(f)
@@ -90,10 +74,8 @@ class PredictorProducción:
         except Exception as e:
             raise RuntimeError(f"Error al cargar modelo: {e}")
         
-        # Obtener threshold óptimo
         self.threshold = OPTIMAL_THRESHOLDS[nombre_clase]
         print(f"✓ Threshold óptimo: {self.threshold:.3f}")
-        print(f"  (F1-Score máximo en validación)")
     
     def predecir(self, X_nuevas, usar_threshold_optimo=True, retornar_probabilidades=False):
         """
@@ -122,7 +104,6 @@ class PredictorProducción:
         if X_nuevas.shape[1] != 17:
             raise ValueError(f"Se esperan 17 features, recibidas {X_nuevas.shape[1]}")
         
-        # Obtener probabilidades
         try:
             if hasattr(self.modelo, 'predict_proba'):
                 y_proba = self.modelo.predict_proba(X_nuevas)
@@ -131,7 +112,6 @@ class PredictorProducción:
         except Exception as e:
             raise RuntimeError(f"Error en predicción: {e}")
         
-        # Aplicar threshold
         if usar_threshold_optimo:
             threshold_usado = self.threshold
             y_pred = (y_proba[:, 1] >= threshold_usado).astype(int)
@@ -139,7 +119,6 @@ class PredictorProducción:
             threshold_usado = 0.5
             y_pred = (y_proba[:, 1] >= 0.5).astype(int)
         
-        # Calcular confianza (distancia al threshold)
         confianza = np.abs(y_proba[:, 1] - threshold_usado)
         
         resultado = {
@@ -171,7 +150,6 @@ class PredictorProducción:
         """
         resultado = self.predecir([features], retornar_probabilidades=True)
         
-        # Retornar solo la primera predicción
         return {
             'prediccion': resultado['predicciones'][0],
             'clase': resultado['clases'][0],
@@ -213,7 +191,6 @@ class PredictorProducción:
                 'es_optimo': threshold == self.threshold
             })
         
-        # Mostrar tabla
         print(f"\n{'Threshold':<12} | {'Precision':<12} | {'Recall':<12} | {'F1-Score':<12} | Óptimo")
         print("-" * 65)
         for r in resultados:
@@ -246,26 +223,19 @@ def guardar_configuracion_produccion():
     print("✓ Configuración guardada en config_produccion.json")
     return config
 
-
-# ============================================================================
-# EJEMPLO DE USO
-# ============================================================================
-
 if __name__ == '__main__':
     print("="*80)
     print("DEMOSTRACIÓN: PREDICTOR EN PRODUCCIÓN CON THRESHOLD ÓPTIMO")
     print("="*80)
     
     try:
-        # Crear predictor
         print("\n1. Inicializando predictor...")
         predictor = PredictorProducción('random_forest')
         
-        # Ejemplo 1: Predicción simple
         print("\n2. Predicción simple (una partida)...")
         features_ejemplo = [
-            35, 20, 1, 0, 1, 480, 0, 1800, 300,  # base_time, increment
-            0, 0, 1, 0, 0, 1, 0, 0  # ECO families
+            35, 20, 1, 0, 1, 480, 0, 1800, 300,
+            0, 0, 1, 0, 0, 1, 0, 0
         ]
         
         pred = predictor.predecir_una(features_ejemplo)
@@ -274,9 +244,8 @@ if __name__ == '__main__':
         print(f"   P(Principiante): {pred['prob_principiante']:.3f}")
         print(f"   P(Intermedio): {pred['prob_intermedio']:.3f}")
         
-        # Ejemplo 2: Batch predictions
         print("\n3. Predicciones batch (100 partidas)...")
-        X_batch = np.random.randn(100, 17)  # Datos simulados
+        X_batch = np.random.randn(100, 17)
         resultados = predictor.predecir(X_batch)
         
         print(f"   Total de predicciones: {len(resultados['predicciones'])}")
@@ -284,7 +253,6 @@ if __name__ == '__main__':
         print(f"   Intermedios: {sum(resultados['predicciones'] == 1)}")
         print(f"   Confianza promedio: {resultados['confianza'].mean():.3f}")
         
-        # Guardar configuración
         print("\n4. Guardando configuración...")
         guardar_configuracion_produccion()
         

@@ -1,10 +1,3 @@
-"""
-SCRIPT: Comparación ANTES vs DESPUÉS de SMOTE
-Entrena modelos con y sin SMOTE y compara resultados
-
-Ejecutar con: python compare_smote_impact.py
-"""
-
 import numpy as np
 import pandas as pd
 import os
@@ -23,7 +16,6 @@ def main():
     print("COMPARACIÓN: IMPACTO DE SMOTE EN EL ENTRENAMIENTO")
     print("="*100)
     
-    # 1. Preprocesamiento
     print("\n[1/3] Cargando y preprocesando datos...")
     csv_path = os.path.join('data', 'games.csv')
     
@@ -31,7 +23,7 @@ def main():
         csv_path,
         n_samples=2500,
         plots_dir='plots',
-        skip_eda=True  # No regenerar EDA
+        skip_eda=True
     )
     
     data_split = preprocess_result['data_split']
@@ -47,14 +39,12 @@ def main():
     print(f"  Val: {len(X_val)} muestras")
     print(f"  Test: {len(X_test)} muestras")
     
-    # Información de desbalance original
     unique, counts = np.unique(y_train, return_counts=True)
     print(f"\nDistribución original en train:")
     for label, count in zip(unique, counts):
         pct = 100 * count / len(y_train)
         print(f"  Clase {label}: {count} ({pct:.1f}%)")
     
-    # 2. Entrenar SIN SMOTE
     print("\n[2/3] ENTRENAMIENTO SIN SMOTE")
     print("-" * 100)
     
@@ -62,7 +52,6 @@ def main():
     rf_result_sin_smote = train_random_forest(data_split, X_train, y_train, X_val, y_val)
     rf_sin_smote = rf_result_sin_smote['best_estimator']
     
-    # Evaluar
     metrics_sin_smote = evaluate_model(rf_sin_smote, X_test, y_test, model_name='Random Forest (SIN SMOTE)')
     
     print(f"\nResultados SIN SMOTE:")
@@ -71,18 +60,15 @@ def main():
     print(f"  Precision (macro): {metrics_sin_smote['precision_macro']:.4f}")
     print(f"  Recall (macro): {metrics_sin_smote['recall_macro']:.4f}")
     
-    # Recall por clase
     y_pred_sin = rf_sin_smote.predict(X_test)
     recall_por_clase_sin = recall_score(y_test, y_pred_sin, average=None)
     print(f"\n  Recall por clase:")
     for i, r in enumerate(recall_por_clase_sin):
         print(f"    Clase {i}: {r:.4f}")
     
-    # 3. Entrenar CON SMOTE
     print("\n[3/3] ENTRENAMIENTO CON SMOTE")
     print("-" * 100)
     
-    # Aplicar SMOTE
     print("\nAplicando SMOTE...")
     X_train_smote, y_train_smote, smote_info = aplicar_smote(X_train, y_train, verbose=False)
     
@@ -93,7 +79,6 @@ def main():
         print(f"  Clase {label}: {count} ({pct:.1f}%)")
     print(f"\nMuestras: {len(X_train)} → {len(X_train_smote)} (+{100*(len(X_train_smote)/len(X_train)-1):.1f}%)")
     
-    # Entrenar RF con SMOTE (pero usando mismos X_val, X_test)
     print("\nEntrenando Random Forest (con SMOTE data)...")
     
     from models.random_forest_model import train_random_forest
@@ -112,7 +97,6 @@ def main():
     
     rf_con_smote = grid_search.best_estimator_
     
-    # Evaluar
     metrics_con_smote = evaluate_model(rf_con_smote, X_test, y_test, model_name='Random Forest (CON SMOTE)')
     
     print(f"\nResultados CON SMOTE:")
@@ -121,14 +105,12 @@ def main():
     print(f"  Precision (macro): {metrics_con_smote['precision_macro']:.4f}")
     print(f"  Recall (macro): {metrics_con_smote['recall_macro']:.4f}")
     
-    # Recall por clase
     y_pred_con = rf_con_smote.predict(X_test)
     recall_por_clase_con = recall_score(y_test, y_pred_con, average=None)
     print(f"\n  Recall por clase:")
     for i, r in enumerate(recall_por_clase_con):
         print(f"    Clase {i}: {r:.4f}")
     
-    # COMPARACIÓN FINAL
     print("\n" + "="*100)
     print("COMPARACIÓN: ANTES vs DESPUÉS de SMOTE")
     print("="*100)
@@ -168,7 +150,6 @@ def main():
         print(f"\n⚠️ SMOTE no mejoró significativamente (cambio: {mejora_promedio:+.2f}%)")
         print("\n📊 Recomendación: Verificar configuración")
     
-    # Información adicional
     print(f"\n📝 Detalles:")
     print(f"  Muestras train sin SMOTE: {len(X_train)}")
     print(f"  Muestras train con SMOTE: {len(X_train_smote)}")

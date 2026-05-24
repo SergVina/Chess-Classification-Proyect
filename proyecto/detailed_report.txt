@@ -7,26 +7,26 @@ MODELO: Logistic Regression
 ============================================================
 
 MÉTRICAS GENERALES:
-  Accuracy:      0.6640
-  Precision (macro): 0.6430
-  Recall (macro):    0.6556
-  F1-Score (macro):  0.6442
-  ROC-AUC:       0.7059
+  Accuracy:      0.6250
+  Precision (macro): 0.6115
+  Recall (macro):    0.6232
+  F1-Score (macro):  0.6085
+  ROC-AUC:       0.6568
 
 CLASIFICATION REPORT:
               precision    recall  f1-score   support
 
-Principiante       0.78      0.68      0.73       330
-  Intermedio       0.50      0.63      0.56       170
+Principiante       0.76      0.63      0.69       132
+  Intermedio       0.46      0.62      0.53        68
 
-    accuracy                           0.66       500
-   macro avg       0.64      0.66      0.64       500
-weighted avg       0.69      0.66      0.67       500
+    accuracy                           0.62       200
+   macro avg       0.61      0.62      0.61       200
+weighted avg       0.66      0.62      0.63       200
 
 
 MATRIZ DE CONFUSIÓN:
-[[225 105]
- [ 63 107]]
+[[83 49]
+ [26 42]]
 
 
 ============================================================
@@ -34,26 +34,26 @@ MODELO: Neural Network
 ============================================================
 
 MÉTRICAS GENERALES:
-  Accuracy:      0.7000
-  Precision (macro): 0.6600
-  Recall (macro):    0.6344
-  F1-Score (macro):  0.6401
-  ROC-AUC:       0.7369
+  Accuracy:      0.6050
+  Precision (macro): 0.5350
+  Recall (macro):    0.5296
+  F1-Score (macro):  0.5275
+  ROC-AUC:       0.5771
 
 CLASIFICATION REPORT:
               precision    recall  f1-score   support
 
-Principiante       0.74      0.84      0.79       330
-  Intermedio       0.58      0.43      0.49       170
+Principiante       0.68      0.77      0.72       132
+  Intermedio       0.39      0.29      0.34        68
 
-    accuracy                           0.70       500
-   macro avg       0.66      0.63      0.64       500
-weighted avg       0.69      0.70      0.69       500
+    accuracy                           0.60       200
+   macro avg       0.54      0.53      0.53       200
+weighted avg       0.58      0.60      0.59       200
 
 
 MATRIZ DE CONFUSIÓN:
-[[277  53]
- [ 97  73]]
+[[101  31]
+ [ 48  20]]
 
 
 ============================================================
@@ -61,26 +61,26 @@ MODELO: SVM (RBF)
 ============================================================
 
 MÉTRICAS GENERALES:
-  Accuracy:      0.6200
-  Precision (macro): 0.5917
-  Recall (macro):    0.5980
-  F1-Score (macro):  0.5924
-  ROC-AUC:       0.6458
+  Accuracy:      0.5350
+  Precision (macro): 0.5048
+  Recall (macro):    0.5051
+  F1-Score (macro):  0.5027
+  ROC-AUC:       0.5482
 
 CLASIFICATION REPORT:
               precision    recall  f1-score   support
 
-Principiante       0.73      0.67      0.70       330
-  Intermedio       0.45      0.53      0.49       170
+Principiante       0.66      0.60      0.63       132
+  Intermedio       0.35      0.41      0.38        68
 
-    accuracy                           0.62       500
-   macro avg       0.59      0.60      0.59       500
-weighted avg       0.64      0.62      0.63       500
+    accuracy                           0.54       200
+   macro avg       0.50      0.51      0.50       200
+weighted avg       0.56      0.54      0.54       200
 
 
 MATRIZ DE CONFUSIÓN:
-[[220 110]
- [ 80  90]]
+[[79 53]
+ [40 28]]
 
 
 ============================================================
@@ -88,26 +88,26 @@ MODELO: Random Forest
 ============================================================
 
 MÉTRICAS GENERALES:
-  Accuracy:      0.6760
-  Precision (macro): 0.6328
-  Recall (macro):    0.6234
-  F1-Score (macro):  0.6265
-  ROC-AUC:       0.7105
+  Accuracy:      0.6250
+  Precision (macro): 0.5714
+  Recall (macro):    0.5662
+  F1-Score (macro):  0.5674
+  ROC-AUC:       0.6404
 
 CLASIFICATION REPORT:
               precision    recall  f1-score   support
 
-Principiante       0.74      0.79      0.76       330
-  Intermedio       0.53      0.46      0.49       170
+Principiante       0.70      0.75      0.73       132
+  Intermedio       0.44      0.38      0.41        68
 
-    accuracy                           0.68       500
-   macro avg       0.63      0.62      0.63       500
-weighted avg       0.67      0.68      0.67       500
+    accuracy                           0.62       200
+   macro avg       0.57      0.57      0.57       200
+weighted avg       0.61      0.62      0.62       200
 
 
 MATRIZ DE CONFUSIÓN:
-[[260  70]
- [ 92  78]]
+[[99 33]
+ [42 26]]
 
 
 ============================================================
@@ -115,160 +115,160 @@ MODELO: Ensemble
 ============================================================
 
 MÉTRICAS GENERALES:
-  Accuracy:      0.6900
-  Precision (macro): 0.6528
-  Recall (macro):    0.6496
-  F1-Score (macro):  0.6511
-  ROC-AUC:       0.7264
+  Accuracy:      0.6250
+  Precision (macro): 0.5834
+  Recall (macro):    0.5840
+  F1-Score (macro):  0.5837
+  ROC-AUC:       0.6309
 
 CLASIFICATION REPORT:
               precision    recall  f1-score   support
 
-Principiante       0.76      0.78      0.77       330
-  Intermedio       0.55      0.52      0.53       170
+Principiante       0.72      0.71      0.71       132
+  Intermedio       0.45      0.46      0.45        68
 
-    accuracy                           0.69       500
-   macro avg       0.65      0.65      0.65       500
-weighted avg       0.69      0.69      0.69       500
-
-
-MATRIZ DE CONFUSIÓN:
-[[256  74]
- [ 81  89]]
-
-
-============================================================
-MODELO: Logistic Regression (thr=0.460)
-============================================================
-
-MÉTRICAS GENERALES:
-  Accuracy:      0.6280
-  Precision (macro): 0.6478
-  Recall (macro):    0.6626
-  F1-Score (macro):  0.6239
-  ROC-AUC:       0.7059
-
-CLASIFICATION REPORT:
-              precision    recall  f1-score   support
-
-Principiante       0.82      0.55      0.66       330
-  Intermedio       0.47      0.77      0.58       170
-
-    accuracy                           0.63       500
-   macro avg       0.65      0.66      0.62       500
-weighted avg       0.70      0.63      0.64       500
+    accuracy                           0.62       200
+   macro avg       0.58      0.58      0.58       200
+weighted avg       0.63      0.62      0.63       200
 
 
 MATRIZ DE CONFUSIÓN:
-[[183 147]
- [ 39 131]]
+[[94 38]
+ [37 31]]
 
 
 ============================================================
-MODELO: Neural Network (thr=0.275)
-============================================================
-
-MÉTRICAS GENERALES:
-  Accuracy:      0.6320
-  Precision (macro): 0.6653
-  Recall (macro):    0.6784
-  F1-Score (macro):  0.6301
-  ROC-AUC:       0.7369
-
-CLASIFICATION REPORT:
-              precision    recall  f1-score   support
-
-Principiante       0.85      0.53      0.66       330
-  Intermedio       0.48      0.82      0.60       170
-
-    accuracy                           0.63       500
-   macro avg       0.67      0.68      0.63       500
-weighted avg       0.73      0.63      0.64       500
-
-
-MATRIZ DE CONFUSIÓN:
-[[176 154]
- [ 30 140]]
-
-
-============================================================
-MODELO: SVM (RBF) (thr=0.435)
-============================================================
-
-MÉTRICAS GENERALES:
-  Accuracy:      0.6060
-  Precision (macro): 0.6066
-  Recall (macro):    0.6188
-  F1-Score (macro):  0.5959
-  ROC-AUC:       0.6458
-
-CLASIFICATION REPORT:
-              precision    recall  f1-score   support
-
-Principiante       0.77      0.58      0.66       330
-  Intermedio       0.45      0.66      0.53       170
-
-    accuracy                           0.61       500
-   macro avg       0.61      0.62      0.60       500
-weighted avg       0.66      0.61      0.62       500
-
-
-MATRIZ DE CONFUSIÓN:
-[[191 139]
- [ 58 112]]
-
-
-============================================================
-MODELO: Random Forest (thr=0.275)
+MODELO: Logistic Regression (thr=0.355)
 ============================================================
 
 MÉTRICAS GENERALES:
   Accuracy:      0.5700
-  Precision (macro): 0.6529
-  Recall (macro):    0.6457
-  F1-Score (macro):  0.5696
-  ROC-AUC:       0.7105
+  Precision (macro): 0.6246
+  Recall (macro):    0.6279
+  F1-Score (macro):  0.5698
+  ROC-AUC:       0.6568
 
 CLASIFICATION REPORT:
               precision    recall  f1-score   support
 
-Principiante       0.87      0.41      0.56       330
-  Intermedio       0.43      0.88      0.58       170
+Principiante       0.82      0.45      0.58       132
+  Intermedio       0.43      0.81      0.56        68
 
-    accuracy                           0.57       500
-   macro avg       0.65      0.65      0.57       500
-weighted avg       0.72      0.57      0.57       500
+    accuracy                           0.57       200
+   macro avg       0.62      0.63      0.57       200
+weighted avg       0.69      0.57      0.57       200
 
 
 MATRIZ DE CONFUSIÓN:
-[[135 195]
- [ 20 150]]
+[[59 73]
+ [13 55]]
 
 
 ============================================================
-MODELO: Ensemble (thr=0.410)
+MODELO: Neural Network (thr=0.450)
 ============================================================
 
 MÉTRICAS GENERALES:
-  Accuracy:      0.6620
-  Precision (macro): 0.6626
-  Recall (macro):    0.6812
-  F1-Score (macro):  0.6533
-  ROC-AUC:       0.7264
+  Accuracy:      0.5900
+  Precision (macro): 0.5632
+  Recall (macro):    0.5682
+  F1-Score (macro):  0.5627
+  ROC-AUC:       0.5771
 
 CLASIFICATION REPORT:
               precision    recall  f1-score   support
 
-Principiante       0.82      0.62      0.71       330
-  Intermedio       0.50      0.74      0.60       170
+Principiante       0.71      0.64      0.67       132
+  Intermedio       0.41      0.50      0.45        68
 
-    accuracy                           0.66       500
-   macro avg       0.66      0.68      0.65       500
-weighted avg       0.71      0.66      0.67       500
+    accuracy                           0.59       200
+   macro avg       0.56      0.57      0.56       200
+weighted avg       0.61      0.59      0.60       200
 
 
 MATRIZ DE CONFUSIÓN:
-[[205 125]
- [ 44 126]]
+[[84 48]
+ [34 34]]
+
+
+============================================================
+MODELO: SVM (RBF) (thr=0.375)
+============================================================
+
+MÉTRICAS GENERALES:
+  Accuracy:      0.5450
+  Precision (macro): 0.5706
+  Recall (macro):    0.5769
+  F1-Score (macro):  0.5417
+  ROC-AUC:       0.5482
+
+CLASIFICATION REPORT:
+              precision    recall  f1-score   support
+
+Principiante       0.74      0.48      0.58       132
+  Intermedio       0.40      0.68      0.50        68
+
+    accuracy                           0.55       200
+   macro avg       0.57      0.58      0.54       200
+weighted avg       0.63      0.55      0.55       200
+
+
+MATRIZ DE CONFUSIÓN:
+[[63 69]
+ [22 46]]
+
+
+============================================================
+MODELO: Random Forest (thr=0.335)
+============================================================
+
+MÉTRICAS GENERALES:
+  Accuracy:      0.6100
+  Precision (macro): 0.6200
+  Recall (macro):    0.6332
+  F1-Score (macro):  0.6033
+  ROC-AUC:       0.6404
+
+CLASIFICATION REPORT:
+              precision    recall  f1-score   support
+
+Principiante       0.79      0.56      0.65       132
+  Intermedio       0.45      0.71      0.55        68
+
+    accuracy                           0.61       200
+   macro avg       0.62      0.63      0.60       200
+weighted avg       0.67      0.61      0.62       200
+
+
+MATRIZ DE CONFUSIÓN:
+[[74 58]
+ [20 48]]
+
+
+============================================================
+MODELO: Ensemble (thr=0.360)
+============================================================
+
+MÉTRICAS GENERALES:
+  Accuracy:      0.5500
+  Precision (macro): 0.6029
+  Recall (macro):    0.6056
+  F1-Score (macro):  0.5498
+  ROC-AUC:       0.6309
+
+CLASIFICATION REPORT:
+              precision    recall  f1-score   support
+
+Principiante       0.79      0.43      0.56       132
+  Intermedio       0.41      0.78      0.54        68
+
+    accuracy                           0.55       200
+   macro avg       0.60      0.61      0.55       200
+weighted avg       0.66      0.55      0.55       200
+
+
+MATRIZ DE CONFUSIÓN:
+[[57 75]
+ [15 53]]
 
 
