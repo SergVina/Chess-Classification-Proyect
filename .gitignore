@@ -1,0 +1,11 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+proyecto/plots/
+proyecto/reports/
+proyecto/config_produccion.json
+proyecto/detailed_report.txt
+proyecto/model_comparison.txt
